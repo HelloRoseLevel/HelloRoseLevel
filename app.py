@@ -5,13 +5,23 @@ from modules.auth import (
 )
 from modules import dashboard, ingresos, egresos, subir, reportes, configuracion, edicion, login, visor
 from modules.data_loader import load_data, refresh_data
+from modules.login import get_base64_image
 
+import base64
+from pathlib import Path
+  
+logo_path2 = Path(__file__).parent.parent / "assets" / "logo2.png"
+logo_base642 = get_base64_image(logo_path2)
 
 st.set_page_config(
     page_title="Panel Financiero - Rose Level",
-    page_icon="🌹",
+    page_icon=logo_path2,
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+    'Get Help': 'https://www.x.com/fercarstens',
+    'Report a bug': "https://www.x.com/fercarstens",
+    'About': "# Rose Level - Panel Financiero"}
 )
 
 init_session_state()
@@ -19,7 +29,8 @@ init_session_state()
 if not st.session_state["authentication_status"]:
     login.render()
 else:
-    st.sidebar.title(f"👋 Bienvenido, {st.session_state['name']}")
+    st.sidebar.image(str(logo_path2), width=40)
+    st.sidebar.title(f"Bienvenido, {st.session_state['name']}")
     st.sidebar.info(f"🔑 Usuario: {st.session_state['username']}")
     st.sidebar.divider()
     menu_options = [

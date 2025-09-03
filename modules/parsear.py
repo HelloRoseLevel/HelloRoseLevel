@@ -69,9 +69,9 @@ def categorizar_movimiento(descripcion):
                                      "grocery", "groceries", "supermarket", "dollar general",
                                      "dollar tree", "7-eleven", "7 eleven", "circle k", "shell",
                                      "chevron", "exxon", "mobil", "bp", "gasoline", "fuel",
-                                     "gas station", "petro", "valero", "citgo", "speedway"
+                                     "gas station", "petro", "valero", "citgo", "speedway", "apple",
                                      "tortillas", "tacos", "burritos", "pizza", "burgers",
-                                     "hamburgers", "chicken", "steak", "kitchen"]):
+                                     "hamburgers", "chicken", "steak", "kitchen", "fedex", "tortilleria"]):
         return "Gastos de Representación"
     if any(word in desc for word in ["atm withdrawal", "atm", "cash withdrawal"]):
         return "Cash"
@@ -80,7 +80,7 @@ def categorizar_movimiento(descripcion):
     if any(word in desc for word in ["youtube", "slack", "linkedin", "bluehost", "blaze.ai", "perplexity",
                                      "canva", "lastpass", "workspace", "hushed.com", "turboscribe",
                                      "notion", "evernote", "dropbox", "adobe", "netflix", "spotify",
-                                     "apple music", "prime video", "amazon prime", "hulu", "disney+",
+                                     "music", "prime video", "amazon prime", "hulu", "disney+",
                                      "audible", "audible.com", "robinhood", "fidelity", "vanguard",
                                      "etrade", "schwab", "coinbase", "binance", "crypto.com",
                                      "nordvpn", "expressvpn", "surfshark", "cyberghost",

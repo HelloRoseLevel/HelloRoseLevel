@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from modules import themes_utils
 
 def render(movimientos_df, extractos_df):
 
@@ -86,24 +86,25 @@ def render(movimientos_df, extractos_df):
     if not resumen.empty:
         col_graf, col_pie = st.columns([1,1])
         with col_graf:
-            fig, ax = plt.subplots(figsize=(3, 2))  
-            resumen.plot(kind='bar', ax=ax)
-            ax.set_ylabel("Monto ($)", fontsize=8)
-            ax.set_title("Ingresos y Egresos por Banco", fontsize=10)
-            ax.tick_params(axis='x', labelsize=7)
-            ax.tick_params(axis='y', labelsize=7)
-            ax.grid(axis='y', linestyle='--', alpha=0.7)
-            ax.set_xlabel("")  # Quitar el label del eje x
-            # Leyenda debajo del eje x
-            ax.legend(
-                title="Tipo de movimiento",
-                fontsize=7,
-                title_fontsize=8,
-                loc='lower center',
-                bbox_to_anchor=(0.5, -0.65),  # Más abajo para no tapar las letras
-                ncol=len(resumen.columns)
+# Filtrar solo egresos de suscripciones
+            mask_suscripciones = df['categoría'].str.lower() == 'subscriptions/services'.lower()
+            suscripciones_mes = (
+                df[(df['tipo'].str.lower() == 'egreso') & mask_suscripciones]
+                .copy()
             )
-            st.pyplot(fig)
+            if not suscripciones_mes.empty:
+                suscripciones_mes['mes'] = suscripciones_mes['fecha'].dt.strftime('%Y-%m')
+                resumen_suscripciones = suscripciones_mes.groupby('mes')['monto'].sum()
+                fig, ax = plt.subplots(figsize=(4, 3))
+                resumen_suscripciones.plot(kind='bar', ax=ax, color=themes_utils.ROSE_LEVEL_COLORS["secondary"])
+                ax.set_title("Egresos por Suscripciones/Servicios por Mes")
+                ax.set_ylabel("Monto ($)")
+                ax.set_xlabel("Mes")
+                ax.tick_params(axis='x', labelrotation=45)
+                st.pyplot(fig)
+            else:
+                st.info("No hay egresos de suscripciones para mostrar por mes.")
+
         with col_pie:
             # Filtrar solo egresos cuya categoría es exactamente 'Subscriptions/Services'
             mask_suscripciones = df['categoría'].str.lower() == 'subscriptions/services'.lower()
@@ -199,7 +200,7 @@ def render(movimientos_df, extractos_df):
             with col_bar:
                 fig3, ax3 = plt.subplots(figsize=(2.2, 2.2))
                 data_bar = data_torta.sort_values(ascending=False)
-                data_bar.plot(kind='bar', ax=ax3, color='#ff6961')
+                data_bar.plot(kind='bar', ax=ax3)
                 ax3.set_ylabel("Monto ($)", fontsize=7)
                 ax3.set_xlabel("")
                 ax3.set_title("Egresos por categoría", fontsize=9)

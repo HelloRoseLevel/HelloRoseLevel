@@ -1,0 +1,5 @@
+[theme]
+primaryColor="#201e4c"          # tono principal
+backgroundColor="#111217"       # fondo general (oscuro para elegancia)
+secondaryBackgroundColor="#22242a" # paneles y cajas
+textColor="#fff"                # texto en blanco
