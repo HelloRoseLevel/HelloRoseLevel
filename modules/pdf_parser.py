@@ -60,12 +60,6 @@ def extract_data_from_pdf(pdf_path, filename=None):
     banco = None
     try:
         texto = extraer_texto(pdf_path)
-        
-        st.write("**TEXTO EXTRAÍDO DEL PDF:**")
-        st.text(texto[:2000])  # Primeros 2000 caracteres
- 
-
-        
         banco = detectar_banco(texto, filename=filename)
         from modules.parsear import (parsear_chase, parsear_mercury, parsear_truist, parsear_wise_usd, parsear_wise_eur)
 
