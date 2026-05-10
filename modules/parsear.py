@@ -275,8 +275,9 @@ def parsear_mercury(texto, nombre_archivo):
     return df_movimientos, df_extractos
 
 def parsear_truist(texto, nombre_archivo):
-    saldo_inicial_pat = re.search(r'Yourpreviousbalanceasof(\d{2}/\d{2}/\d{4}) \$([0-9,]+\.\d{2})', texto)
-    saldo_final_pat = re.search(r'Yournewbalanceasof(\d{2}/\d{2}/\d{4}) =\$([0-9,]+\.\d{2})', texto)
+    # Patrones más flexibles para capturar fechas y saldos con espacios variables
+    saldo_inicial_pat = re.search(r'Your\s*previous\s*balance\s*as\s*of\s*(\d{2}/\d{2}/\d{4})\s*\$?([0-9,]+\.\d{2})', texto)
+    saldo_final_pat = re.search(r'Your\s*new\s*balance\s*as\s*of\s*(\d{2}/\d{2}/\d{4})\s*=?\s*\$?([0-9,]+\.\d{2})', texto)
 
     fecha_inicio = datetime.strptime(saldo_inicial_pat.group(1), "%m/%d/%Y").date() if saldo_inicial_pat else None
     fecha_fin = datetime.strptime(saldo_final_pat.group(1), "%m/%d/%Y").date() if saldo_final_pat else None
