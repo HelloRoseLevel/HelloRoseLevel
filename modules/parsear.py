@@ -213,7 +213,7 @@ def parsear_mercury(texto, nombre_archivo):
         r'(?:\s+\$[0-9,]+\.\d{2})?'                # Balance final (opcional)
         r'(?:\n|$)', re.MULTILINE)
 
-    anio_mov = anio if anio else (fecha_inicio.year if fecha_inicio else 2025)
+    anio_mov = anio if anio else (fecha_inicio.year if fecha_inicio else datetime.now().year)
     last_fecha = None
 
     for match in mov_pat.finditer(texto):
@@ -304,7 +304,7 @@ def parsear_truist(texto, nombre_archivo):
     for linea in bloque_egresos.strip().split('\n'):
         match = re.match(r'(\d{2}/\d{2}) (.+) ([0-9,]+\.\d{2})', linea.strip())
         if match:
-            fecha_str = f"{fecha_inicio.year}/{match.group(1)}" if fecha_inicio else f"2025/{match.group(1)}"
+            fecha_str = f"{fecha_inicio.year}/{match.group(1)}" if fecha_inicio else f"{datetime.now().year}/{match.group(1)}"
             fecha = datetime.strptime(fecha_str, "%Y/%m/%d").date()
             descripcion = match.group(2).strip()
             monto = float(match.group(3).replace(",", ""))
@@ -326,7 +326,7 @@ def parsear_truist(texto, nombre_archivo):
     for linea in bloque_ingresos.strip().split('\n'):
         match = re.match(r'(\d{2}/\d{2}) (.+) ([0-9,]+\.\d{2})', linea.strip())
         if match:
-            fecha_str = f"{fecha_inicio.year}/{match.group(1)}" if fecha_inicio else f"2025/{match.group(1)}"
+            fecha_str = f"{fecha_inicio.year}/{match.group(1)}" if fecha_inicio else f"{datetime.now().year}/{match.group(1)}"
             fecha = datetime.strptime(fecha_str, "%Y/%m/%d").date()
             descripcion = match.group(2).strip()
             monto = float(match.group(3).replace(",", ""))
@@ -363,11 +363,11 @@ def parsear_truist(texto, nombre_archivo):
     return df_movimientos, df_extractos
 
 def parsear_wise_usd(texto, nombre_archivo):
-    periodo_pat = re.search(r'USD statement\n(\d{1,2} [A-Za-z]+ \d{4}) \[GMT.*?\] - (\d{1,2} [A-Za-z]+ \d{4}) \[GMT', texto, re.IGNORECASE)
-    fecha_inicio = datetime.strptime(periodo_pat.group(1), "%d %B %Y").date() if periodo_pat else None
-    fecha_fin = datetime.strptime(periodo_pat.group(2), "%d %B %Y").date() if periodo_pat else None
+    periodo_pat = re.search(r'USD statement\n([A-Za-z]+ \d{1,2}, \d{4}) \[GMT.*?\] - ([A-Za-z]+ \d{1,2}, \d{4}) \[GMT', texto, re.IGNORECASE)
+    fecha_inicio = datetime.strptime(periodo_pat.group(1), "%B %d, %Y").date() if periodo_pat else None
+    fecha_fin = datetime.strptime(periodo_pat.group(2), "%B %d, %Y").date() if periodo_pat else None
 
-    saldo_final_pat = re.search(r'USD balance on [\d ]+[A-Za-z]+ \d{4} \[GMT.*?\] ([0-9,]+\.\d{2}) USD', texto)
+    saldo_final_pat = re.search(r'USD on [A-Za-z]+ \d{1,2}, \d{4} \[GMT.*?\] ([0-9,]+\.\d{2}) USD', texto)
     saldo_final = float(saldo_final_pat.group(1).replace(",", "")) if saldo_final_pat else None
 
     banco = "Wise USD"
@@ -383,14 +383,14 @@ def parsear_wise_usd(texto, nombre_archivo):
 
         # ¿Esta línea es movimiento y la siguiente es fecha?
         mov_pat = re.compile(r'^(.+?)\s+(-?[0-9,]+\.\d{2})\s+([0-9,]+\.\d{2})$')
-        fecha_pat = re.match(r'(\d{1,2} [A-Za-z]+ \d{4}) Transaction:', next_line)
+        fecha_pat = re.match(r'([A-Za-z]+ \d{1,2}, \d{4}) Transaction:', next_line)
         match = mov_pat.match(mov_line)
         if match and fecha_pat:
             descripcion = match.group(1).strip()
             monto = float(match.group(2).replace(",", ""))
             balance = float(match.group(3).replace(",", ""))
             try:
-                fecha = datetime.strptime(fecha_pat.group(1), "%d %B %Y").date()
+                fecha = datetime.strptime(fecha_pat.group(1), "%B %d, %Y").date()
             except Exception:
                 fecha = None
             # Mejor tipo usando descripción
@@ -459,15 +459,15 @@ def parsear_wise_eur(texto, nombre_archivo):
     # --------- EXTRAER PERIODO Y SALDO FINAL ---------
     # Regex robusto para periodo (tolera saltos de línea y cualquier zona horaria)
     periodo_pat = re.search(
-        r"EUR statement\s*\n\s*(\d{1,2} [A-Za-z]+ \d{4}) \[GMT[^\]]*\] - (\d{1,2} [A-Za-z]+ \d{4}) \[GMT[^\]]*\]",
+        r"EUR statement\s*\n\s*([A-Za-z]+ \d{1,2}, \d{4}) \[GMT[^\]]*\] - ([A-Za-z]+ \d{1,2}, \d{4}) \[GMT[^\]]*\]",
         texto, 
         re.IGNORECASE
     )
-    fecha_inicio = datetime.strptime(periodo_pat.group(1), "%d %B %Y").date() if periodo_pat else None
-    fecha_fin = datetime.strptime(periodo_pat.group(2), "%d %B %Y").date() if periodo_pat else None
+    fecha_inicio = datetime.strptime(periodo_pat.group(1), "%B %d, %Y").date() if periodo_pat else None
+    fecha_fin = datetime.strptime(periodo_pat.group(2), "%B %d, %Y").date() if periodo_pat else None
 
     saldo_final_pat = re.search(
-        r"EUR balance on [\d ]+[A-Za-z]+ \d{4} \[GMT[^\]]*\] ([0-9,]+\.\d{2}) EUR", 
+        r"EUR on [A-Za-z]+ \d{1,2}, \d{4} \[GMT[^\]]*\] ([0-9,]+\.\d{2}) EUR", 
         texto
     )
     saldo_final = float(saldo_final_pat.group(1).replace(",", "")) if saldo_final_pat else None
@@ -484,14 +484,14 @@ def parsear_wise_eur(texto, nombre_archivo):
         next_line = lines[i+1].strip()
 
         mov_pat = re.compile(r'^(.+?)\s+(-?[0-9,]+\.\d{2})\s+([0-9,]+\.\d{2})$')
-        fecha_pat = re.match(r'(\d{1,2} [A-Za-z]+ \d{4}) Transaction:', next_line)
+        fecha_pat = re.match(r'([A-Za-z]+ \d{1,2}, \d{4}) Transaction:', next_line)
         match = mov_pat.match(mov_line)
         if match and fecha_pat:
             descripcion = match.group(1).strip()
             monto = float(match.group(2).replace(",", ""))
             balance = float(match.group(3).replace(",", ""))
             try:
-                fecha = datetime.strptime(fecha_pat.group(1), "%d %B %Y").date()
+                fecha = datetime.strptime(fecha_pat.group(1), "%B %d, %Y").date()
             except Exception:
                 fecha = None
 
