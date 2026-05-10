@@ -363,11 +363,7 @@ def parsear_truist(texto, nombre_archivo):
     return df_movimientos, df_extractos
 
 def parsear_wise_usd(texto, nombre_archivo):
-    periodo_pat = re.search(
-    r'USD statement\s+(\d{1,2} [A-Za-z]+ \d{4}).*?-\s+(\d{1,2} [A-Za-z]+ \d{4})',
-    texto,
-    re.IGNORECASE | re.DOTALL
-)
+    periodo_pat = re.search(r'USD statement\n(\d{1,2} [A-Za-z]+ \d{4}) \[GMT.*?\] - (\d{1,2} [A-Za-z]+ \d{4}) \[GMT', texto, re.IGNORECASE)
     fecha_inicio = datetime.strptime(periodo_pat.group(1), "%d %B %Y").date() if periodo_pat else None
     fecha_fin = datetime.strptime(periodo_pat.group(2), "%d %B %Y").date() if periodo_pat else None
 
