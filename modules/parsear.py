@@ -280,25 +280,6 @@ def parsear_truist(texto, nombre_archivo):
     saldo_final_pat = re.search(r'Your\s*new\s*balance\s*as\s*of\s*(\d{2}/\d{2}/\d{4})\s*=?\s*\$?([0-9,]+\.\d{2})', texto)
 
 
-        # 👇
-    st.write("DEBUG TRUIST:")
-    st.write(f"Coincidencia inicial: {saldo_inicial_pat}")
-    if saldo_inicial_pat:
-        st.write(f"  - Fecha: {saldo_inicial_pat.group(1)}")
-        st.write(f"  - Saldo: {saldo_inicial_pat.group(2)}")
-    st.write(f"Coincidencia final: {saldo_final_pat}")
-    if saldo_final_pat:
-        st.write(f"  - Fecha: {saldo_final_pat.group(1)}")
-        st.write(f"  - Saldo: {saldo_final_pat.group(2)}")
-    
-    # Búsquedas alternativas para debug
-    st.write("Buscando patrones alternativos:")
-    alt1 = re.search(r'previous balance.*?(\d{2}/\d{2}/\d{4}).*?(\$?[0-9,]+\.\d{2})', texto, re.IGNORECASE)
-    st.write(f"Alt1: {alt1}")
-    if alt1:
-        st.write(f"  - {alt1.groups()}")
-
-
     fecha_inicio = datetime.strptime(saldo_inicial_pat.group(1), "%m/%d/%Y").date() if saldo_inicial_pat else None
     fecha_fin = datetime.strptime(saldo_final_pat.group(1), "%m/%d/%Y").date() if saldo_final_pat else None
     saldo_inicial = float(saldo_inicial_pat.group(2).replace(",", "")) if saldo_inicial_pat else None
